@@ -29,7 +29,7 @@ class TargetRegion(object):
 class TargetRegionForLeftAnchor(TargetRegion):
     """docstring for TargetRegionForLeftAnchor"""
     def __init__(self, g_region, anchor):
-        assert g_region.ref_name() == anchor.ref_name and g_region.end_pos() > anchor.pos
+        assert g_region.reference_name() == anchor.reference_name() and g_region.end_pos() > anchor.position()
         super(TargetRegionForLeftAnchor, self).__init__(g_region, anchor)
 
     def anchor_matches(self, variant):
@@ -42,7 +42,7 @@ class TargetRegionForLeftAnchor(TargetRegion):
 class TargetRegionForRightAnchor(TargetRegion):
     """docstring for TargetRegionForRightAnchor"""
     def __init__(self, g_region, anchor):
-        assert g_region.ref_name() == anchor.ref_name and g_region.start_pos() < anchor.pos
+        assert g_region.reference_name() == anchor.reference_name() and g_region.start_pos() < anchor.position()
         super(TargetRegionForRightAnchor, self).__init__(g_region, anchor)
 
     def anchor_matches(self, variant):

@@ -1,6 +1,14 @@
 from abc import ABCMeta, abstractmethod
-from generic import GenomePosition, GenomeRegion, GenomePositionWithCi, Interval
 import re
+from generic import GenomePosition, GenomeRegion, GenomePositionWithCi, Interval
+
+
+class VariantTypes(object):
+    """docstring for VariantType"""
+    DEL = 0
+    INS = 1
+    INV = 2
+    DUP = 3
 
 
 class Variant(object):
@@ -29,7 +37,7 @@ class Variant(object):
         return '{}, {}, {}, L:{}'.format(self.pos1, self.pos2, self.name, len(self))
 
     def __len__(self):
-        return self.pos2.genome_pos.pos - self.pos1.genome_pos.pos - 1
+        return self.pos2.position() - self.pos1.position() - 1
 
     def _genome_region(self):
         return GenomeRegion(self.pos1.genome_pos, self.pos2.genome_pos)
