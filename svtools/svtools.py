@@ -8,6 +8,7 @@ from docopt import docopt
 from schema import Schema, And, Use, SchemaError
 import variants
 import evaluate
+from targetregions import get_target_regions_from_file, eval_target_regions
 
 __version__ = '0.1.0'
 
@@ -60,6 +61,10 @@ Options:
     except SchemaError as e:
         exit(e)
 
+    truth = evaluate.get_variants(variants.SvsimBedpeFile, args['-r'], 5)
+    taregions = get_target_regions_from_file(args['<file1>'])
+    eval_target_regions(taregions, truth)
+
 
 @argparsed
 def diff(args):
@@ -94,7 +99,8 @@ Options:
     pred1 = evaluate.get_variants(Tools[args['<tool1>']], args['<file1>'])
     pred2 = evaluate.get_variants(Tools[args['<tool2>']], args['<file2>'])
 
-    evaluate.compare_variants(truth, pred1, pred2, lambda v1, v2: v1.matched_with_both_overlaps(v2))
+    evaluate.compare_variants(
+        truth, pred1, pred2, lambda v1, v2: v1.matched_with_both_overlaps(v2))
 
 
 def help(argv):
