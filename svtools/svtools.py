@@ -127,6 +127,7 @@ General Options:
 Commands:
   sim             Generate an artificial genome.
   diff            Show the difference between calls of two tools
+  taregion        Evaluate target regions
 
 See 'svtools help <command>' for more information on a specific command.
     """

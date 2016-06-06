@@ -12,6 +12,10 @@ class TargetRegion(object):
         self.g_region = g_region
         self.anchor = anchor
 
+    def __str__(self):
+        return "{}\t{}\t{}\t{}".format(self.g_region.reference_name(),
+            self.g_region.start_pos(), self.g_region.end_pos(), self.anchor.pos)
+
     @abstractmethod
     def anchor_matches(self, variant):
         pass
@@ -76,11 +80,21 @@ def get_target_regions_from_file(filename):
 def eval_target_regions(taregions, truth_variants):
     taregions = list(taregions)
     num_taregions = len(taregions)
+    num_anchor_matched = 0
     num_matched = 0
+
+    unmatched_taregions = []
+
     for ta in taregions:
         for v in truth_variants:
-            if ta.anchor_matches(v) and ta.matches(v):
-                num_matched += 1
+            if ta.anchor_matches(v):
+                num_anchor_matched += 1
+                if ta.matches(v):
+                    num_matched += 1
+                else:
+                    unmatched_taregions.append(ta)
 
-    precision = float(num_matched) / num_taregions
+    precision = float(num_matched) / num_anchor_matched
+    print "{}\t{}\t{}".format(num_taregions, num_anchor_matched, num_matched)
     print "Precision(%): {}".format(round(precision*100, 2))
+    print "\n".join([str(x) for x in unmatched_taregions])
