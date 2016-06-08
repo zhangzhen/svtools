@@ -1,9 +1,19 @@
 import re
-
+import pysam
 
 def natural_key(s):
     return [int(c) if c.isdigit() else c for c in re.split(r'(\d+)', s)]
 
+
+b37_Chrom_Names = []
+
+
+def get_reference_names_from_bam(filename):
+    res = []
+    with pysam.AlignmentFile(filename, "rb") as f:
+        res = [x['SN'] for x in f.header['SQ']]
+
+    return res
 
 class GenomePosition(object):
 
@@ -59,6 +69,9 @@ class Interval(object):
 
     def __str__(self):
         return '[{}, {}]'.format(self.a, self.b)
+
+    def before(self, pos):
+        return pos < self.a
 
     def covers(self, pos):
         return pos >= self.a and pos <= self.b
@@ -142,6 +155,10 @@ class GenomeRegion(object):
 
     def end_pos(self):
         return self.end.pos
+
+    def before(self, g_pos):
+        if (self.start.reference_name() == g_pos.reference_name()):
+            return Interval(self.start.position(), self.end.position()).before(g_pos.position())
 
     def covers(self, g_pos):
         return self.start.reference_name() == g_pos.reference_name() \

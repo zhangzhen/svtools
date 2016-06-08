@@ -16,6 +16,9 @@ class TargetRegion(object):
         return "{}\t{}\t{}\t{}".format(self.g_region.reference_name(),
             self.g_region.start_pos(), self.g_region.end_pos(), self.anchor.pos)
 
+    def reference_name(self):
+        return self.g_region.reference_name()
+
     @abstractmethod
     def anchor_matches(self, variant):
         pass
@@ -84,6 +87,14 @@ def eval_target_regions(taregions, truth_variants):
     num_matched = 0
 
     unmatched_taregions = []
+
+    i = j = 0
+
+    while i < len(taregions) and j < len(truth_variants):
+        if taregions[i].anchor_matches(truth_variants[j]):
+
+            i += 1
+            j += 1
 
     for ta in taregions:
         for v in truth_variants:

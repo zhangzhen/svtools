@@ -39,6 +39,9 @@ class Variant(object):
     def __len__(self):
         return self.pos2.position() - self.pos1.position() - 1
 
+    def reference_name(self):
+        return self.pos1.reference_name()
+
     def _genome_region(self):
         return GenomeRegion(self.pos1.genome_pos, self.pos2.genome_pos)
 

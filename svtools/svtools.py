@@ -16,6 +16,7 @@ Tools = {
     'sprites': variants.SpritesBedpeFile
 }
 
+Chromosomes = ['all'] + [str(i) for i in range(1, 23)] + ['X', 'Y']
 
 def argparsed(func):
     @wraps(func)
@@ -41,17 +42,19 @@ Options:
 @argparsed
 def taregion(args):
     """
-Usage: svtools taregion -r <file0> <file1>
+Usage: svtools taregion -r <file0> -c <chrom> <file1>
 
 Dump audio meta data of the <files>.
 
 Options:
   -r <file0>    The true variants file
+  -c <chrom>    Specify a chromosome
   <file1>       The target regions file
     """
 
     schema = Schema({
         '-r': os.path.isfile,
+        '-c': And(str, lambda s: s in Chromosomes),
         '<file1>': os.path.isfile,
         'taregion': True
     })
@@ -63,6 +66,9 @@ Options:
 
     truth = evaluate.get_variants(variants.SvsimBedpeFile, args['-r'], 5)
     taregions = get_target_regions_from_file(args['<file1>'])
+    if args['<chrom>'] != 'all':
+        truth = [x for x in truth if x.reference_name() == args['chrom']]
+        taregions = [x for x in taregions if x.reference_name() == args['chrom']]
     eval_target_regions(taregions, truth)
 
 
