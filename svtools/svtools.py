@@ -6,9 +6,11 @@ import os
 from functools import wraps
 from docopt import docopt
 from schema import Schema, And, Use, SchemaError
+from generic import ChromNameIdConverter
 import variants
 import evaluate
 from targetregions import get_target_regions_from_file, eval_target_regions
+import pysam
 
 __version__ = '0.1.0'
 
@@ -16,7 +18,6 @@ Tools = {
     'sprites': variants.SpritesBedpeFile
 }
 
-Chromosomes = ['all'] + [str(i) for i in range(1, 23)] + ['X', 'Y']
 
 def argparsed(func):
     @wraps(func)
@@ -54,7 +55,7 @@ Options:
 
     schema = Schema({
         '-r': os.path.isfile,
-        '-c': And(str, lambda s: s in Chromosomes),
+        '-c': And(str, lambda s: ChromNameIdConverter.is_valid(s)),
         '<file1>': os.path.isfile,
         'taregion': True
     })
@@ -65,10 +66,10 @@ Options:
         exit(e)
 
     truth = evaluate.get_variants(variants.SvsimBedpeFile, args['-r'], 5)
-    taregions = get_target_regions_from_file(args['<file1>'])
-    if args['<chrom>'] != 'all':
-        truth = [x for x in truth if x.reference_name() == args['chrom']]
-        taregions = [x for x in taregions if x.reference_name() == args['chrom']]
+    taregions = list(get_target_regions_from_file(args['<file1>']))
+    if args['-c'] != 'all':
+        truth = [x for x in truth if x.reference_name() == args['-c']]
+        taregions = [x for x in taregions if x.reference_name() == args['-c']]
     eval_target_regions(taregions, truth)
 
 
@@ -109,6 +110,35 @@ Options:
         truth, pred1, pred2, lambda v1, v2: v1.matched_with_both_overlaps(v2))
 
 
+def get_reference_names_from_bam(filename):
+    res = []
+    with pysam.AlignmentFile(filename, "rb") as f:
+        res = [x['SN'] for x in f.header['SQ']]
+
+    return res
+
+
+@argparsed
+def refname(args):
+    """
+Usage: svtools refname <file>
+
+List all reference names found in the header of a given BAM file
+    """
+    schema = Schema({
+        '<file>': os.path.isfile,
+        'refname': True
+    })
+
+    try:
+        args = schema.validate(args)
+    except SchemaError as e:
+        exit(e)
+
+    reference_names = get_reference_names_from_bam(args['<file>'])
+    print "\n".join(reference_names)
+
+
 def help(argv):
     if len(argv) > 1:
         cmd = argv[-1]
@@ -134,6 +164,7 @@ Commands:
   sim             Generate an artificial genome.
   diff            Show the difference between calls of two tools
   taregion        Evaluate target regions
+  refname         List reference names
 
 See 'svtools help <command>' for more information on a specific command.
     """

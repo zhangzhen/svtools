@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 import re
-from generic import GenomePosition, GenomeRegion, GenomePositionWithCi, Interval
+from generic import ChromNameIdConverter, GenomePosition, GenomeRegion, GenomePositionWithCi, Interval
 
 
 class VariantTypes(object):
@@ -146,8 +146,16 @@ class SvsimBedpeFile(VariantFile):
     def data_to_deletion(self, data):
         return Deletion(
             data[6],
-            GenomePosition(data[0], int(data[2])).genome_position_with_ci(self.slop),
-            GenomePosition(data[3], int(data[5])).genome_position_with_ci(self.slop)
+            GenomePosition(
+                ChromNameIdConverter.name_to_id(data[0]),
+                data[0],
+                int(data[2])
+            ).genome_position_with_ci(self.slop),
+            GenomePosition(
+                ChromNameIdConverter.name_to_id(data[3]),
+                data[3],
+                int(data[5])
+            ).genome_position_with_ci(self.slop)
         )
 
     def data_to_insertion(self, data):
@@ -157,8 +165,16 @@ class SvsimBedpeFile(VariantFile):
         self._file_obj.next()
         return Deletion(
             data[6],
-            GenomePosition(data[0], int(data[2])),
-            GenomePosition(data[3], int(data[5]))
+            GenomePosition(
+                ChromNameIdConverter.name_to_id(data[0]),
+                data[0],
+                int(data[2])
+            ),
+            GenomePosition(
+                ChromNameIdConverter.name_to_id(data[3]),
+                data[3],
+                int(data[5])
+            )
         )
 
     def data_to_duplication(self, data):
@@ -179,19 +195,61 @@ class SpritesBedpeFile(VariantFile):
         if data[6].endswith('5F'):
             return Deletion(
                 data[6],
-                GenomePositionWithCi(GenomePosition(data[0], int(data[2])), Interval(-delta, 0)),
-                GenomePositionWithCi(GenomePosition(data[3], int(data[5])), Interval(-delta, 0))
+                GenomePositionWithCi(
+                    GenomePosition(
+                        ChromNameIdConverter.name_to_id(data[0]),
+                        data[0],
+                        int(data[2])
+                    ),
+                    Interval(-delta, 0)
+                ),
+                GenomePositionWithCi(
+                    GenomePosition(
+                        ChromNameIdConverter.name_to_id(data[3]),
+                        data[3],
+                        int(data[5])
+                    ),
+                    Interval(-delta, 0)
+                )
             )
         if data[6].endswith('5R'):
             return Deletion(
                 data[6],
-                GenomePositionWithCi(GenomePosition(data[0], int(data[1])+1), Interval(0, delta)),
-                GenomePositionWithCi(GenomePosition(data[3], int(data[4])+1), Interval(0, delta))
+                GenomePositionWithCi(
+                    GenomePosition(
+                        ChromNameIdConverter.name_to_id(data[0]),
+                        data[0],
+                        int(data[1])+1
+                    ),
+                    Interval(0, delta)
+                ),
+                GenomePositionWithCi(
+                    GenomePosition(
+                        ChromNameIdConverter.name_to_id(data[3]),
+                        data[3],
+                        int(data[4])+1
+                    ),
+                    Interval(0, delta)
+                )
             )
         return Deletion(
             data[6],
-            GenomePositionWithCi(GenomePosition(data[0], int(data[2])), Interval(-delta, 0)),
-            GenomePositionWithCi(GenomePosition(data[3], int(data[5])), Interval(-delta, 0))
+            GenomePositionWithCi(
+                GenomePosition(
+                    ChromNameIdConverter.name_to_id(data[0]),
+                    data[0],
+                    int(data[2])
+                ),
+                Interval(-delta, 0)
+            ),
+            GenomePositionWithCi(
+                GenomePosition(
+                    ChromNameIdConverter.name_to_id(data[3]),
+                    data[3],
+                    int(data[5])
+                ),
+                Interval(-delta, 0)
+            )
         )
 
     def data_to_insertion(self, data):
